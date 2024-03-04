@@ -44,20 +44,23 @@ def signup():
     if not email or not password or not api_token:
         return jsonify({"msg": "Missing email or password or api_token"}), 400
 
+    print(email)
     if User.query.filter_by(email=email).first():
         return jsonify({"msg": "User with this email already exists"}), 409
 
     new_user = User(email=email, password=password, api_token=api_token)  # Directly storing the hashed password
-
+    print("created dummy user")
     try:
         db.session.add(new_user)
+        print("added to db")
         db.session.commit()
     except Exception as e:
         db.session.rollback()
+        print("in exception")
         return jsonify({"msg": "Failed to create user", "error": str(e)}), 500
     print("signed successfully")
 
-    return jsonify({"msg": "User created successfully", "user": {"email": email, "api_token": api_token}}), 201
+    return jsonify({"msg": "User created successfully", "user": {"email": email}}), 201
 
 
 @app.route('/login', methods=['POST'])
