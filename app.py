@@ -7,7 +7,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Suhas#5232@database-mastery-grading.cx0k4s4omp9i.us-east-1.rds.amazonaws.com:5432/mastery_database'
+app.config['SQLALCHEMY_DATABASE_URI'] = ''
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Configure cache to use Redis
