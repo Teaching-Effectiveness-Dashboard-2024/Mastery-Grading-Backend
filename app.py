@@ -1,13 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
+from canvasapi import Canvas
 from flask_caching import Cache
 
 app = Flask(__name__)
 CORS(app)
 
 # Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = ''
+app.config['SQLALCHEMY_DATABASE_URI'] = ""
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Configure cache to use Redis
@@ -25,7 +26,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)  # Storing passwords in plaintext
     api_token = db.Column(db.String(255), unique=True, nullable=False)
-
+    canvasUserId = db.Column(db.Integer, unique=True, nullable=False)
 
 # Create the database tables based on the models
 with app.app_context():
@@ -82,9 +83,48 @@ def login():
 
         print("logged in successfully")
 
-        return jsonify({"msg": "Login successful", "user": {"email": email, "api_token": user.api_token}}), 200
+        return jsonify({"msg": "Login successful", "user": {"email": email}}), 200
     else:
         return jsonify({"msg": "Login failed. Invalid email or password."}), 401
+
+
+def GetCanvasUser(api_token):
+    API_URL = "https://sjsu.instructure.com/"
+
+    return Canvas(API_URL, api_token)
+
+@app.route('/dashboard', methods=['POST'])
+@cross_origin(origin='localhost', headers=['Content- Type', 'Authorization'])
+def dashboard():
+    print("entered dashboard")
+    data = request.get_json()
+    email = data.get('email')
+    print(email)
+
+
+
+    if not email:
+        return jsonify({"msg": "Invalid request: Missing email "}), 400
+
+    user = User.query.filter_by(email=email).first()
+    print(user)
+    if user and user.api_token and user.canvasUserId:
+
+        print("Data fetched successfully")
+        canvas = GetCanvasUser(user.api_token)
+        canvasUser = canvas.get_user(user.canvasUserId)
+
+        # print("user is:" + str(canvasUser))
+        avatars = canvasUser.get_avatars()
+        for avatar in avatars:
+            print(avatar.url)
+        name = str(canvasUser)
+        name = name.split('(')[0]
+        print(name)
+
+        return jsonify({"msg": "Data fetched successfully", "user": {"email": email, "name": name, "imageURL": str(avatars[1].url)}}), 200
+    else:
+        return jsonify({"msg": "Data failed to load"}), 401
 
 
 if __name__ == '__main__':
