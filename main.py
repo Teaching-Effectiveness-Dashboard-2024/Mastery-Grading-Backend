@@ -7,7 +7,7 @@ from grading.routes import grading_bp
 app = Flask(__name__)
 
 # Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:rootgrading@database-mastery-grading.cx0k4s4omp9i.us-east-1.rds.amazonaws.com:5432/mastery_database"
+app.config['SQLALCHEMY_DATABASE_URI'] = ""
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize SQLAlchemy with the Flask app
